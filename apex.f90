@@ -266,7 +266,7 @@ subroutine apex_mka(date,gplat,gplon,gpalt,nlat,nlon,nalt,ier)
   integer :: i,j,k,kpol,istat
   real :: reqore,rqorm1,cp,ct,st,sp,stmcpm,stmspm,ctm
   real :: aht,alat,phia,bmag,xmag,ymag,zdown,vmp ! apex_sub output
-  real :: vnor,rp,reqam1,a,slp,clp,phiar
+  real :: vnor,rp,reqam1,slp,clp,phiar
 !
 ! pola:
 !   Limiting latitude magnitude (deg); when the geographic latitude is
@@ -1644,7 +1644,7 @@ subroutine gm2gc(gmlat,gmlon,gclat,gclon)
   real,intent(out) :: gclat,gclon ! geocentric lat,lon
 !
 ! Local:
-  real :: ylat,ylon,stm,ctm,ctc
+  real :: stm,ctm,ctc
 
   stm = cos(gmlat*dtr)
   ctm = sin(gmlat*dtr)
