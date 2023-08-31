@@ -2,7 +2,7 @@
 c Test program for apex.f90 module
       use apex
       implicit none
-      integer ier,i,iyr,iday,ihr,imn
+      integer ier,iyr,iday,ihr,imn
       real date,glat,glon,alt,hr,altmax, gdlat,gdlon,qdlon
       real gclat,gclon,gmlat,gmlon
       real bmag,si,alon,malat,vmp,W,D,Be3,sim,qdlat,F
