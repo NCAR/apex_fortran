@@ -8,3 +8,7 @@
 1/2020
   update the code with IGRF 13 coefficients (relases Dec 2019)
   https://www.ngdc.noaa.gov/IAGA/vmod/igrf.html
+
+12/2024
+  update the code with IGRF 14 coefficients (released 19th Nov 2024)
+  https://www.ncei.noaa.gov/products/international-geomagnetic-reference-field
