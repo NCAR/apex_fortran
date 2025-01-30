@@ -1,7 +1,7 @@
 module apex
 !
-! This software is part of the NCAR TIE-GCM.  Use is governed by the 
-! Open Source Academic Research License Agreement contained in the file 
+! This software is part of the NCAR TIE-GCM.  Use is governed by the
+! Open Source Academic Research License Agreement contained in the file
 ! tiegcmlicense.txt.
 !
 ! 2018 May: A.D. Richmond modifications to add full base vectors f3,g1,g2,g3;
@@ -12,10 +12,10 @@ module apex
 !   by Art Richmond and Roy Barnes in the 1993-2000 timeframe, using
 !   field-line tracing routines developed in 1973 by Wally Clark at NOAA.
 !   This version is written in free-format fortran90. Subroutines and
-!   module data may be use-associated from this module. 
+!   module data may be use-associated from this module.
 !
 ! Reference: Richmond, A. D., Ionospheric Electrodynamics Using Magnetic Apex
-!   Coordinates, J. Geomag. Geoelectr., 47, 191-212, 1995, 
+!   Coordinates, J. Geomag. Geoelectr., 47, 191-212, 1995,
 !   https://doi.org/10.5636/jgg.47.191
 !
 ! A typical calling sequence for a code calling this module is as follows:
@@ -30,12 +30,12 @@ module apex
 !    The nalt dimension depends on nvert and altmax; for nvert=40 and altmax
 !    between 910.2 and 1124.3, nalt=7 .  For very large altmax the maximum
 !    nalt is nvert+1.
-! 
+!
 ! subroutine apex_mall:
 !   Calculate modified Apex coordinates, basis vectors described in
 !    Richmond [1995], and other magnetic field parameters
 !    (often called from lat,lon,alt nested loop)
-! 
+!
 ! subroutine apex_q2g or apex_m2g:
 !   Convert from quasi-dipole or modified magnetic-apex coordinates
 !     to geodetic coordinates.
@@ -63,16 +63,16 @@ module apex
   integer :: nglat,nglon,ngalt ! numbers of lat,lon,alt grid points,
 !  set in apex_mka to nlat,nlon,nalt as determined by ggrid.
 !
-! This grid (geolat,geolon,geoalt is equivalent to gdlat,gdlon,gdalt, 
+! This grid (geolat,geolon,geoalt is equivalent to gdlat,gdlon,gdalt,
 ! as passed to apex_mka.
-  real,allocatable,save :: geolat(:), geolon(:), geoalt(:)    
+  real,allocatable,save :: geolat(:), geolon(:), geoalt(:)
 
   integer,parameter :: nmax=13 ! maximum degree of IGRF coefficients
   integer,parameter :: ncoef = nmax*nmax + 2*nmax + 1 ! 196
   real,dimension(ncoef) :: &
     gb, & ! Coefficients for magnetic field calculation
     gv    ! Coefficients for magnetic potential calculation
-! 
+!
  real, parameter :: &
     dtr=0.0174532925199432957692369076847, & ! degrees to radians
     rtd=57.2957795130823208767981548147      ! radians to degrees
@@ -80,14 +80,14 @@ module apex
   real :: &
     pola ! Limiting latitude magnitude (deg); when the geographic
 !          latitude is poleward of pola, then xarray,yarray,zarray,varray
-!          are forced to be constant for all longitudes at each altitude.  
+!          are forced to be constant for all longitudes at each altitude.
 
   real,parameter ::        & ! Formerly common /APXCON/
     req  = 6378.137,       & ! Equatorial earth radius
     precise = 7.6e-11,     & ! Precision factor
     glatlim = 89.9,        & ! Limit above which gradients are recalculated
     xmiss = -32767.,       & ! Set missing values to this
-    req2 = req*req,        & 
+    req2 = req*req,        &
     req2e2 = req2*(2. - 1./fltnvrs)/fltnvrs
 !
   real ::  & ! Formerly /APXDIPL/ and /DIPOLE/
@@ -104,21 +104,21 @@ module apex
     bb       ! Magnitude of field vector at the current tracing point (Gauss)
 
   real ::      & ! Formerly /APXIN/
-    yapx(3,3)    ! Matrix of cartesian coordinates (loaded columnwise) 
+    yapx(3,3)    ! Matrix of cartesian coordinates (loaded columnwise)
 !
 ! /ITRA/ was only in subs linapx and itrace, so it could be removed from module
 !  data if those routines are properly restructured to pass the /ITRA/
 !  variables.
 !
-  integer ::   & ! Formerly /ITRA/ 
+  integer ::   & ! Formerly /ITRA/
     nstp         ! Step count. Incremented in sub linapx.
-  real    ::   & 
+  real    ::   &
     y(3),      & ! Array containing current tracing point cartesian coordinates.
     yp(3),     & ! Array containing previous tracing point cartesian coordinates.
     sgn,       & ! Determines direction of trace. Set in subprogram linapx
     ds           ! Step size (Km) Computed in subprogram linapx.
 
-  real ::         & ! limits beyond which east-west gradients are computed 
+  real ::         & ! limits beyond which east-west gradients are computed
     glatmn,glatmx   ! differently to avoid potential underflow (apex_mka)
 
 contains
@@ -129,22 +129,22 @@ subroutine apex_setup(date,altmax)
 !  for use when calling apex_mall, apex_q2g, or apex_m2g.
 
   real, intent(in) ::  &
-               date,   & ! Date in year and fraction (e.g., 2018.5) 
+               date,   & ! Date in year and fraction (e.g., 2018.5)
                altmax    ! Maximum altitude that will be used (km).
-!   
+!
   integer,parameter :: nvert = 40 ! Resolution parameter, corresponding
 !   to the maximum number of vertical grid increments when altmax=infinity.
 !   Points are spaced uniformly in 1/r between the Earth's surface and an
-!   altitude that is at least altmax (or a very large value if altmax=infinity).  
+!   altitude that is at least altmax (or a very large value if altmax=infinity).
   integer,parameter ::            &
                mxlat = 3*nvert+1, & ! number of latitude grid points
-               mxlon = 5*nvert+1, & ! number of longitude grid points 
+               mxlon = 5*nvert+1, & ! number of longitude grid points
                mxalt =   nvert+1    ! maximum number of height grid points
 ! Local
   integer :: nlat,nlon,nalt ! Numbers of lat, lon, alt grid points
   real :: gplat(mxlat),gplon(mxlon),gpalt(mxalt) ! grid latitudes (deg),
 !   longitudes (deg), and altitudes (km), respectively
-  integer :: ier ! Error flag, non-zero if there is a problem. 
+  integer :: ier ! Error flag, non-zero if there is a problem.
 
   nlat = 0
   nlon = 0
@@ -157,14 +157,14 @@ subroutine apex_setup(date,altmax)
       stop 'apex_setup apex_mka'
     endif
 !
-!   
+!
 end subroutine apex_setup
 !-----------------------------------------------------------------------
 subroutine ggrid(nvert,glatmin,glatmax,glonmin,glonmax,altmin,altmax, &
                  gplat,gplon,gpalt,mxlat,mxlon,mxalt,nlat,nlon,nalt)
 !
-! Given desired range of geographic latitude, longitude and altitude, 
-! choose an appropriate grid that can be used in subsequent calls to 
+! Given desired range of geographic latitude, longitude and altitude,
+! choose an appropriate grid that can be used in subsequent calls to
 ! subs apex_mka, apex_mall, apex_q2g.
 !
 ! Input args:
@@ -209,10 +209,10 @@ subroutine ggrid(nvert,glatmin,glatmax,glonmin,glonmax,altmin,altmax, &
   nlatmin = max(int((glatmin+90.)/dlat),0)
   nlatmax = min(int((glatmax+90.)/dlat+1.),3*nvert)
   nlonmin = max(int((glonmin+180.)/dlon),0)
- 
+
   glonmaxx = min(glonmax,glonmin+360.)
   nlonmax = min(int((glonmaxx+180.)/dlon+1.),10*nvert)
-    
+
   x = re/(re+altmax)/diht-eps
   naltmin = max(x,1.)
   naltmin = min(naltmin,nvert-1)
@@ -271,7 +271,7 @@ subroutine apex_mka(date,gplat,gplon,gpalt,nlat,nlon,nalt,ier)
 ! pola:
 !   Limiting latitude magnitude (deg); when the geographic latitude is
 !    poleward of pola, then xarray,yarray,zarray,varray are forced to
-!    be constant for all longitudes at each altitude.  
+!    be constant for all longitudes at each altitude.
 !
 !   This makes pola = 89.9995 for precise = 7.6e-11:
   pola = 90.-sqrt(precise)*rtd    ! Pole angle (deg)
@@ -369,7 +369,7 @@ subroutine apex_mka(date,gplat,gplon,gpalt,nlat,nlon,nalt,ier)
         zarray(j,i,:) = zarray(j,1,:)
         varray(j,i,:) = varray(j,1,:)
         cycle
-      endif  
+      endif
     enddo ! i=1,nlon
   enddo ! j=1,nlat
 !
@@ -398,18 +398,18 @@ subroutine apex_mall(glat,glon,alt,hr, b,bhat,bmag,si,alon,xlatm,vmp,W,&
     hr                  ! Reference altitude (km)
 
   real,intent(out) :: & ! Output
-    b(3)             ,& ! Magnetic field components (east, north, up), in nT    
-    bhat(3)          ,& ! components (east, north, up) of unit vector along 
+    b(3)             ,& ! Magnetic field components (east, north, up), in nT
+    bhat(3)          ,& ! components (east, north, up) of unit vector along
                         ! geomagnetic field direction
     bmag             ,& ! Magnitude of magnetic field (nT)
-    si               ,& ! sine of magnetic inclination 
-    alon             ,& ! Apex longitude = modified apex longitude = 
+    si               ,& ! sine of magnetic inclination
+    alon             ,& ! Apex longitude = modified apex longitude =
                         ! quasi-dipole longitude (deg)
     xlatm            ,& ! Modified Apex latitude (deg)
     vmp              ,& ! Magnetic potential (T.m)
     W                ,& ! W of Richmond [1995] reference above, in km**2 /nT
                         !  (i.e., 10**15 m**2 /T)
-    D                ,& ! D of Richmond [1995] 
+    D                ,& ! D of Richmond [1995]
     be3              ,& ! B_e3 of Richmond [1995] (= Bmag/D), in nT
     sim              ,& ! sin(I_m) described in Richmond [1995]
     xlatqd           ,& ! Quasi-dipole latitude (deg)
@@ -491,7 +491,7 @@ end subroutine apex_mall
 subroutine apex_q2g(qdlat_in,qdlon,alt,gdlat,gdlon,ier)
 !
 ! Convert from quasi-dipole to geodetic coordinates. This subroutine
-! (input magnetic, output geodetic) is the functional inverse of 
+! (input magnetic, output geodetic) is the functional inverse of
 ! subroutine apex_mall (input geodetic, output magnetic). Sub apex_setup
 !  or apex_mka must be called before this routine.
 !
@@ -546,7 +546,7 @@ subroutine apex_q2g(qdlat_in,qdlon,alt,gdlat,gdlon,ier)
   call gm2gc (qdlat,qdlon,ylat,ylon)
 !
 ! Iterate until (angular distance)**2 (units: radians) is within
-! precise of location (qdlat,qdlon) on a unit sphere. 
+! precise of location (qdlat,qdlon) on a unit sphere.
 ! (precise is a parameter in module data)
 !
   do iter=1,niter
@@ -624,10 +624,10 @@ subroutine apex_q2g(qdlat_in,qdlon,alt,gdlat,gdlon,ier)
 ! in direction of grad(dist2), by amount angdist.
 !
     cal = -hgrd2n/hgrd2
-    sal = -hgrd2e/hgrd2 
+    sal = -hgrd2e/hgrd2
     coslm = cos(ylat*dtr)
     slm = sin(ylat*dtr)
-    cad = cos(angdist) 
+    cad = cos(angdist)
     sad = sin(angdist)
     slp = slm*cad + coslm*sad*cal
 
@@ -662,7 +662,7 @@ subroutine apex_q2g(qdlat_in,qdlon,alt,gdlat,gdlon,ier)
   if (ylat == geolat(1))     edge = 'south'
   if (edge /= '     ') then
     write(6,"('Coordinates are on the ',a,' edge of the interpolation grid ')") edge
-    write(6,"('and latitude is constrained to stay within grid limits when iterating.')") 
+    write(6,"('and latitude is constrained to stay within grid limits when iterating.')")
   endif
   ier = 1
 
@@ -673,7 +673,7 @@ subroutine gradxyzv(alt,cth,sth, &
     dfxdh,dfydh,dfzdh,dfvdh,gradx,grady,gradz,gradv)
 !
 ! Calculates east,north,up components of gradients of x,y,z,v in
-! geodetic coordinates.  All gradients are in inverse km. 
+! geodetic coordinates.  All gradients are in inverse km.
 ! 940803 A. D. Richmond; updated 180510
 !
 ! Args:
@@ -751,7 +751,7 @@ subroutine gradlpv(hr,alt,fx,fy,fz,fv,gradx,grady,gradz,gradv, &
   real,intent(in) :: & ! scalar inputs
     hr,              & ! reference altitude (km)
     alt,             & ! altitude (km)
-    fx,fy,fz,fv        ! interpolated values of x,y,z,v, plus 
+    fx,fy,fz,fv        ! interpolated values of x,y,z,v, plus
                        ! pseudodipole component
   real,dimension(3),intent(in) :: & ! 3-component inputs
     gradx,grady,gradz,gradv ! interpolated gradients of x,y,z,v,
@@ -769,7 +769,7 @@ subroutine gradlpv(hr,alt,fx,fy,fz,fv,gradx,grady,gradz,gradv, &
     clm,    & !  cos(lambda_m)
     r3_2      !  ((re + alt)/(re + hr))**(3/2)
 
-  real,dimension(3),intent(out) :: & ! 3-component outputs 
+  real,dimension(3),intent(out) :: & ! 3-component outputs
     grclm,   & ! grad(cos(lambda_m)), in km-1
     clmgrp,  & ! cos(lambda_m)*grad(phi_a), in km-1
     rgrlp,   & ! (re + alt)*grad(lambda')
@@ -811,7 +811,7 @@ subroutine gradlpv(hr,alt,fx,fy,fz,fv,gradx,grady,gradz,gradv, &
 !  If southern magnetic hemisphere, reverse sign of xlatm
 !
   if (slp < 0.) xlatm = -xlatm
-  do i=1,3  
+  do i=1,3
     grclp = cpm*gradx(i) + spm*grady(i)
     rgrlp(i) = r*(clp*gradz(i) - slp*grclp)
     grclm(i) = sqrror*grclp
@@ -875,10 +875,10 @@ subroutine basevec(hr,xlatm,grclm,clmgrp,rgrlp,b,clm,r3_2, &
   do i=1,3
     d1(i) = d1(i) - d1db*bhat(i)
     d2(i) = d2(i) - d2db*bhat(i)
-  enddo  
+  enddo
   e3(1) = d1(2)*d2(3) - d1(3)*d2(2)
   e3(2) = d1(3)*d2(1) - d1(1)*d2(3)
-  e3(3) = d1(1)*d2(2) - d1(2)*d2(1) 
+  e3(3) = d1(1)*d2(2) - d1(2)*d2(1)
   D = bhat(1)*e3(1) + bhat(2)*e3(2) + bhat(3)*e3(3)
   do i=1,3
     d3(i) = bhat(i)/D
@@ -911,7 +911,7 @@ subroutine basevec(hr,xlatm,grclm,clmgrp,rgrlp,b,clm,r3_2, &
   g3(3) = F
   f3(1) = g1(2)*g2(3) - g1(3)*g2(2)
   f3(2) = g1(3)*g2(1) - g1(1)*g2(3)
-  f3(3) = g1(1)*g2(2) - g1(2)*g2(1) 
+  f3(3) = g1(1)*g2(2) - g1(2)*g2(1)
 
 end subroutine basevec
 !-----------------------------------------------------------------------
@@ -1030,7 +1030,7 @@ subroutine linapx(gdlat,glon,alt,aht,alat,alon,xmag,ymag,zmag,fmag)
 !
 ! Get magnetic field components to determine the direction for tracing field line:
 !
-  iflag = 1 
+  iflag = 1
   call feldg(iflag,gdlat,glon,alt,xmag,ymag,zmag,fmag)
   sgn = sign(1.,-zmag)
 !
@@ -1079,7 +1079,7 @@ subroutine convrt(iflag,gdlat,alt,x1,x2,caller)
 !           x2    = Distance above (north of) Earth's equatorial plane (km)
 !
 ! iflag = 2: Convert from geodetic to geocentric spherical
-!   Input:  gdlat = Geodetic latitude (deg) 
+!   Input:  gdlat = Geodetic latitude (deg)
 !           alt   = Altitude above reference ellipsoid (km)
 !   Output: x1    = Geocentric latitude (deg)
 !           x2    = Geocentric distance (km)
@@ -1104,7 +1104,7 @@ subroutine convrt(iflag,gdlat,alt,x1,x2,caller)
 !
 ! Local:
   real :: sinlat,coslat,d,z,rho,rkm,scl,gclat,ri,a2,a4,a6,a8,&
-    ccl,s2cl,c2cl,s4cl,c4cl,s8cl,s6cl,dltcl,sgl 
+    ccl,s2cl,c2cl,s4cl,c4cl,s8cl,s6cl,dltcl,sgl
   real,parameter ::                                         &
     e2=(2.-1./fltnvrs)/fltnvrs                            , &
     e4=e2*e2, e6=e4*e2, e8=e4*e4                          , &
@@ -1215,7 +1215,7 @@ subroutine feldg(iflag,glat,glon,alt,bnrth,beast,bdown,babs)
 !     bnrth = North component of field vector (Gauss)
 !     beast = East component of field vector (Gauss)
 !     bdown = Downward component of field vector (Gauss)
-!     babs  = Magnitude of field vector (Gauss)  
+!     babs  = Magnitude of field vector (Gauss)
 !
 ! iflag = 2:
 !   Inputs:
@@ -1370,8 +1370,8 @@ subroutine dipapx(gdlat,gdlon,alt,bnorth,beast,bdown,A,alon)
 ! Output:
 !   A      = apex radius, 1 + h_A/R_eq
 !   alon   = apex longitude, degrees
-!     
-! Algorithm: 
+!
+! Algorithm:
 !   Use spherical coordinates.
 !   Let GP be geographic pole.
 !   Let GM be geomagnetic pole (colatitude COLAT, east longitude ELON).
@@ -1459,9 +1459,9 @@ subroutine itrace(iapx)
 ! in cartesian coordinates.
 ! (yapx,yp,y are module data)
 !
-  yploc(1,4) = sgn*bx/bb 
-  yploc(2,4) = sgn*by/bb 
-  yploc(3,4) = sgn*bz/bb 
+  yploc(1,4) = sgn*bx/bb
+  yploc(2,4) = sgn*by/bb
+  yploc(3,4) = sgn*bz/bb
 
   if (nstp > 7) then
     do i=1,3
@@ -1568,7 +1568,7 @@ subroutine fndapx(alt,zmag,A,alat,alon)
     call convrt(iflag_convrt,gdlt,ht(i),rho,yapx(3,i),'fndapx')
     gdln = rtd*atan2(yapx(2,i),yapx(1,i))
     call feldg(iflag_feldg,gdlt,gdln,ht(i),x,ydum,z(i),f)
-  enddo 
+  enddo
 !
 ! Find cartesian coordinates at dip equator by interpolation
 !
@@ -1584,7 +1584,7 @@ subroutine fndapx(alt,zmag,A,alat,alon)
   xinter = max(alt,xinter)
   A = (req+xinter)/req
 !
-! Find apex coordinates, giving alat the sign of dip at starting point.  
+! Find apex coordinates, giving alat the sign of dip at starting point.
 ! alon is the value of the geomagnetic longitude at the apex.
 !
   if (A < 1.) then
@@ -1604,11 +1604,11 @@ subroutine fndapx(alt,zmag,A,alat,alon)
 !   Let ang be longitude angle from GM to apex.
 !   Let tp be colatitude of GM.
 !   Let TF be arc length between GM and apex.
-!   Let PA = be geomagnetic longitude in radians, i.e., Pi minus angle measured 
+!   Let PA = be geomagnetic longitude in radians, i.e., Pi minus angle measured
 !     counterclockwise from arc GM-apex to arc GM-GP.
 !   Then, using notation c=cos, s=sin, spherical-trigonometry formulas
 !     for the functions of the angles are as shown below.  Note: stfcpa,
-!     stfspa are sin(TF) times cos(PA), sin(PA), respectively. 
+!     stfspa are sin(TF) times cos(PA), sin(PA), respectively.
 !
   xlon = atan2(yloc(2),yloc(1))
   ang  = xlon-elon*dtr
@@ -1656,7 +1656,7 @@ subroutine gm2gc(gmlat,gmlon,gclat,gclon)
 !
 ! elon is in module data, and was set by cofrm (called from apex_mka)
 !
-  gclon = gclon*rtd + elon 
+  gclon = gclon*rtd + elon
   if (gclon < -180.) gclon = gclon + 360.
 
 end subroutine gm2gc
@@ -1700,14 +1700,14 @@ subroutine intrp(glat,glon,alt, gplat,gplon,gpalt, nlat,nlon,nalt, &
       i0 = i
       dlat = gplat(i+1)-gplat(i)
       xi = (glat - gplat(i)) / dlat
-      exit 
+      exit
     endif
   enddo
   if (i0==0) then
     write(6,"('>>> intrp: could not bracket glat=',f9.3,' in gplat=',/,(6f9.2))") &
       glat,gplat
     ier = 1
-    return 
+    return
   endif
 
   j0 = 0
@@ -1716,14 +1716,14 @@ subroutine intrp(glat,glon,alt, gplat,gplon,gpalt, nlat,nlon,nalt, &
       j0 = j
       dlon = gplon(j+1)-gplon(j)
       yj = (glon - gplon(j)) / dlon
-      exit 
+      exit
     endif
   enddo
   if (j0==0) then
     write(6,"('>>> intrp: could not bracket glon=',f9.3,' in gplon=',/,(6f9.2))") &
       glon,gplon
     ier = 1
-    return 
+    return
   endif
 
   k0 = 0
@@ -1733,14 +1733,14 @@ subroutine intrp(glat,glon,alt, gplat,gplon,gpalt, nlat,nlon,nalt, &
       hti = re/(re+alt)
       diht = re/(re+gpalt(k+1)) - re/(re+gpalt(k))
       zk = (hti - re/(re+gpalt(k))) / diht
-      exit 
+      exit
     endif
   enddo
   if (k0==0) then
     write(6,"('>>> intrp: could not bracket alt=',f12.3,' in gpalt=',/,(6f12.2))") &
       alt,gpalt
     ier = 1
-    return 
+    return
   endif
 
   call trilin(xarray(i0:i0+1,j0:j0+1,k0:k0+1),nlat,nlon,xi,yj,zk,fx,dfxdn,dfxde,dfxdd)
@@ -1876,7 +1876,7 @@ subroutine adpl(glat,glon,cth,sth,fx,fy,fz,fv, &
   fv = fv - ctm
 
   dfxdth = dfxdth + ctp*cth*cph + stp*sth
-  dfydth = dfydth + cth*sph 
+  dfydth = dfydth + cth*sph
   dfzdth = dfzdth - ctp*sth + stp*cth*cph
   dfvdth = dfvdth + ctp*sth - stp*cth*cph
 
@@ -1934,19 +1934,19 @@ subroutine cofrm(date)
   integer,parameter :: n1=120, n2=195, isv=0
   integer,parameter :: &
     ncn1=19, & ! number of coefficients dimensioned n1
-    ncn2=7     ! number of coefficients dimensioned n2: increase with each IGRF update
+    ncn2=8     ! number of coefficients dimensioned n2: increase with each IGRF update
   integer,parameter :: ngh = n1*ncn1 + n2*ncn2 + 1 ! not sure why the extra +1
   real,save :: g1(n1,ncn1), g2(n2,ncn2), gh(ngh)
   real,parameter :: alt = 0.
 
-  if (date < 1900. .or. date > 2030.) then
-    write(6,"('>>> cofrm: date=',f8.2,' Date must be >= 1900 and <= 2030')") date
+  if (date < 1900. .or. date > 2035.) then
+    write(6,"('>>> cofrm: date=',f8.2,' Date must be >= 1900 and <= 2035')") date
     stop 'cofrm'
   endif
-  if (date > 2025.) then
+  if (date > 2030.) then
     write(6,"('>>> WARNING cofrm:')")
     write(6,"(/,'   This version of IGRF is intended for use up to ')")
-    write(6,"('     2025. Values for ',f9.3,' will be computed but')") date
+    write(6,"('     2030. Values for ',f9.3,' will be computed but')") date
     write(6,"('     may be of reduced accuracy.',/)")
   endif
 
@@ -1965,7 +1965,7 @@ subroutine cofrm(date)
        -3.,    1.,   -2.,   -2.,    8.,    2.,   10.,   -1., &
        -2.,   -1.,    2.,   -3.,   -4.,    2.,    2.,    1., &
        -5.,    2.,   -2.,    6.,    6.,   -4.,    4.,    0., &
-        0.,   -2.,    2.,    4.,    2.,    0.,    0.,   -6.  /) 
+        0.,   -2.,    2.,    4.,    2.,    0.,    0.,   -6.  /)
 
   g1(:,2) = (/                                               & ! 1905
    -31464.,-2298., 5909., -728., 2928.,-1086., 1041., 1065., &
@@ -2360,126 +2360,161 @@ subroutine cofrm(date)
       -0.57,   -0.18,   -0.82 /)
 
   g2(:,4) = (/                                                & ! 2010
-     -29496.57,-1586.42, 4944.26,-2396.06, 3026.34,-2708.54,  &	
-       1668.17, -575.73, 1339.85,-2326.54, -160.40, 1232.10,  &  	
-    	251.75,  633.73, -537.03,  912.66,  808.97,  286.48,  &  	
-    	166.58, -211.03, -356.83,  164.46,   89.40, -309.72,  &  	
-       -230.87,  357.29,   44.58,  200.26,  189.01, -141.05,  &  	
-       -118.06, -163.17,   -0.01,   -8.03,  101.04,   72.78,  &  	
-    	 68.69,  -20.90,   75.92,   44.18, -141.40,   61.54,  &  	
-    	-22.83,  -66.26,   13.10,    3.02,  -78.09,   55.40,  &  	
-    	 80.44,  -75.00,  -57.80,   -4.55,  -21.20,   45.24,  &  	
-    	  6.54,   14.00,   24.96,   10.46,    7.03,    1.64,  &  	
-    	-27.61,    4.92,   -3.28,   24.41,    8.21,   10.84,  &  	
-    	-14.50,  -20.03,   -5.59,   11.83,  -19.34,  -17.41,  &  	
-    	 11.61,   16.71,   10.85,    6.96,  -14.05,  -10.74,  &  	
-    	 -3.54,    1.64,    5.50,    9.45,  -20.54,    3.45,  &  	
-    	 11.51,   -5.27,   12.75,    3.13,   -7.14,  -12.38,  &  	
-    	 -7.42,   -0.76,    7.97,    8.43,    2.14,   -8.42,  &  	
-    	 -6.08,  -10.08,    7.01,   -1.94,   -6.24,    2.73,  &  	
-    	  0.89,   -0.10,   -1.07,    4.71,   -0.16,    4.44,  &  	
-    	  2.45,   -7.22,   -0.33,   -0.96,    2.13,   -3.95,  &  	
-    	  3.09,   -1.99,   -1.03,   -1.97,   -2.80,   -8.31,  &  	
-    	  3.05,   -1.48,    0.13,   -2.03,    1.67,    1.65,  &  	
-    	 -0.66,   -0.51,   -1.76,    0.54,    0.85,   -0.79,  &  	
-    	 -0.39,    0.37,   -2.51,    1.79,   -1.27,    0.12,  &  	
-    	 -2.11,    0.75,   -1.94,    3.75,   -1.86,   -2.12,  &  	
-    	 -0.21,   -0.87,    0.30,    0.27,    1.04,    2.13,  &  	
-    	 -0.63,   -2.49,    0.95,    0.49,   -0.11,    0.59,  &  	
-    	  0.52,    0.00,   -0.39,    0.13,   -0.37,    0.27,  &  	
-    	  0.21,   -0.86,   -0.77,   -0.23,    0.04,    0.87,  &  	
-    	 -0.09,   -0.89,   -0.87,    0.31,    0.30,    0.42,  &  	
-    	  1.66,   -0.45,   -0.59,    1.08,   -1.14,   -0.31,  &  	
-    	 -0.07,    0.78,    0.54,   -0.18,    0.10,    0.38,  &  	
-    	  0.49,    0.02,    0.44,    0.42,   -0.25,   -0.26,  &  	
-    	 -0.53,   -0.26,   -0.79/)   
-	 
+     -29496.57,-1586.42, 4944.26,-2396.06, 3026.34,-2708.54,  &
+       1668.17, -575.73, 1339.85,-2326.54, -160.40, 1232.10,  &
+        251.75,  633.73, -537.03,  912.66,  808.97,  286.48,  &
+        166.58, -211.03, -356.83,  164.46,   89.40, -309.72,  &
+       -230.87,  357.29,   44.58,  200.26,  189.01, -141.05,  &
+       -118.06, -163.17,   -0.01,   -8.03,  101.04,   72.78,  &
+         68.69,  -20.90,   75.92,   44.18, -141.40,   61.54,  &
+        -22.83,  -66.26,   13.10,    3.02,  -78.09,   55.40,  &
+         80.44,  -75.00,  -57.80,   -4.55,  -21.20,   45.24,  &
+          6.54,   14.00,   24.96,   10.46,    7.03,    1.64,  &
+        -27.61,    4.92,   -3.28,   24.41,    8.21,   10.84,  &
+        -14.50,  -20.03,   -5.59,   11.83,  -19.34,  -17.41,  &
+         11.61,   16.71,   10.85,    6.96,  -14.05,  -10.74,  &
+         -3.54,    1.64,    5.50,    9.45,  -20.54,    3.45,  &
+         11.51,   -5.27,   12.75,    3.13,   -7.14,  -12.38,  &
+         -7.42,   -0.76,    7.97,    8.43,    2.14,   -8.42,  &
+         -6.08,  -10.08,    7.01,   -1.94,   -6.24,    2.73,  &
+          0.89,   -0.10,   -1.07,    4.71,   -0.16,    4.44,  &
+          2.45,   -7.22,   -0.33,   -0.96,    2.13,   -3.95,  &
+          3.09,   -1.99,   -1.03,   -1.97,   -2.80,   -8.31,  &
+          3.05,   -1.48,    0.13,   -2.03,    1.67,    1.65,  &
+         -0.66,   -0.51,   -1.76,    0.54,    0.85,   -0.79,  &
+         -0.39,    0.37,   -2.51,    1.79,   -1.27,    0.12,  &
+         -2.11,    0.75,   -1.94,    3.75,   -1.86,   -2.12,  &
+         -0.21,   -0.87,    0.30,    0.27,    1.04,    2.13,  &
+         -0.63,   -2.49,    0.95,    0.49,   -0.11,    0.59,  &
+          0.52,    0.00,   -0.39,    0.13,   -0.37,    0.27,  &
+          0.21,   -0.86,   -0.77,   -0.23,    0.04,    0.87,  &
+         -0.09,   -0.89,   -0.87,    0.31,    0.30,    0.42,  &
+          1.66,   -0.45,   -0.59,    1.08,   -1.14,   -0.31,  &
+         -0.07,    0.78,    0.54,   -0.18,    0.10,    0.38,  &
+          0.49,    0.02,    0.44,    0.42,   -0.25,   -0.26,  &
+         -0.53,   -0.26,   -0.79/)
+
    g2(:,5) = (/                                               & ! 2015
-     -29441.46,-1501.77, 4795.99,-2445.88, 3012.20,-2845.41,  &  
+     -29441.46,-1501.77, 4795.99,-2445.88, 3012.20,-2845.41,  &
        1676.35, -642.17, 1350.33,-2352.26, -115.29, 1225.85,  &
-     	245.04,  581.69, -538.70,  907.42,  813.68,  283.54,  &
-     	120.49, -188.43, -334.85,  180.95,   70.38, -329.23,  &
+        245.04,  581.69, -538.70,  907.42,  813.68,  283.54,  &
+        120.49, -188.43, -334.85,  180.95,   70.38, -329.23,  &
        -232.91,  360.14,   46.98,  192.35,  196.98, -140.94,  &
        -119.14, -157.40,   15.98,    4.30,  100.12,   69.55,  &
-     	 67.57,  -20.61,   72.79,   33.30, -129.85,   58.74,  &
-     	-28.93,  -66.64,   13.14,    7.35,  -70.85,   62.41,  &
-     	 81.29,  -75.99,  -54.27,   -6.79,  -19.53,   51.82,  &
-     	  5.59,   15.07,   24.45,    9.32,    3.27,   -2.88,  &
-     	-27.50,    6.61,   -2.32,   23.98,    8.89,   10.04,  &
-     	-16.78,  -18.26,   -3.16,   13.18,  -20.56,  -14.60,  &
-     	 13.33,   16.16,   11.76,    5.69,  -15.98,   -9.10,  &
-     	 -2.02,    2.26,    5.33,    8.83,  -21.77,    3.02,  &
-     	 10.76,   -3.22,   11.74,    0.67,   -6.74,  -13.20,  &
-     	 -6.88,   -0.10,    7.79,    8.68,    1.04,   -9.06,  &
-     	 -3.89,  -10.54,    8.44,   -2.01,   -6.26,    3.28,  &
-     	  0.17,   -0.40,    0.55,    4.55,   -0.55,    4.40,  &
-     	  1.70,   -7.92,   -0.67,   -0.61,    2.13,   -4.16,  &
-     	  2.33,   -2.85,   -1.80,   -1.12,   -3.59,   -8.72,  &
-     	  3.00,   -1.40,    0.00,   -2.30,    2.11,    2.08,  &
-     	 -0.60,   -0.79,   -1.05,    0.58,    0.76,   -0.70,  &
-     	 -0.20,    0.14,   -2.12,    1.70,   -1.44,   -0.22,  &
-     	 -2.57,    0.44,   -2.01,    3.49,   -2.34,   -2.09,  &
-     	 -0.16,   -1.08,    0.46,    0.37,    1.23,    1.75,  &
-     	 -0.89,   -2.19,    0.85,    0.27,    0.10,    0.72,  &
-     	  0.54,   -0.09,   -0.37,    0.29,   -0.43,    0.23,  &
-     	  0.22,   -0.89,   -0.94,   -0.16,   -0.03,    0.72,  &
-     	 -0.02,   -0.92,   -0.88,    0.42,    0.49,    0.63,  &
-     	  1.56,   -0.42,   -0.50,    0.96,   -1.24,   -0.19,  &
-     	 -0.10,    0.81,    0.42,   -0.13,   -0.04,    0.38,  &
-     	  0.48,    0.08,    0.48,    0.46,   -0.30,   -0.35,  &
-     	 -0.43,   -0.36,   -0.71/)		 	 			  	
-  
+         67.57,  -20.61,   72.79,   33.30, -129.85,   58.74,  &
+        -28.93,  -66.64,   13.14,    7.35,  -70.85,   62.41,  &
+         81.29,  -75.99,  -54.27,   -6.79,  -19.53,   51.82,  &
+          5.59,   15.07,   24.45,    9.32,    3.27,   -2.88,  &
+        -27.50,    6.61,   -2.32,   23.98,    8.89,   10.04,  &
+        -16.78,  -18.26,   -3.16,   13.18,  -20.56,  -14.60,  &
+         13.33,   16.16,   11.76,    5.69,  -15.98,   -9.10,  &
+         -2.02,    2.26,    5.33,    8.83,  -21.77,    3.02,  &
+         10.76,   -3.22,   11.74,    0.67,   -6.74,  -13.20,  &
+         -6.88,   -0.10,    7.79,    8.68,    1.04,   -9.06,  &
+         -3.89,  -10.54,    8.44,   -2.01,   -6.26,    3.28,  &
+          0.17,   -0.40,    0.55,    4.55,   -0.55,    4.40,  &
+          1.70,   -7.92,   -0.67,   -0.61,    2.13,   -4.16,  &
+          2.33,   -2.85,   -1.80,   -1.12,   -3.59,   -8.72,  &
+          3.00,   -1.40,    0.00,   -2.30,    2.11,    2.08,  &
+         -0.60,   -0.79,   -1.05,    0.58,    0.76,   -0.70,  &
+         -0.20,    0.14,   -2.12,    1.70,   -1.44,   -0.22,  &
+         -2.57,    0.44,   -2.01,    3.49,   -2.34,   -2.09,  &
+         -0.16,   -1.08,    0.46,    0.37,    1.23,    1.75,  &
+         -0.89,   -2.19,    0.85,    0.27,    0.10,    0.72,  &
+          0.54,   -0.09,   -0.37,    0.29,   -0.43,    0.23,  &
+          0.22,   -0.89,   -0.94,   -0.16,   -0.03,    0.72,  &
+         -0.02,   -0.92,   -0.88,    0.42,    0.49,    0.63,  &
+          1.56,   -0.42,   -0.50,    0.96,   -1.24,   -0.19,  &
+         -0.10,    0.81,    0.42,   -0.13,   -0.04,    0.38,  &
+          0.48,    0.08,    0.48,    0.46,   -0.30,   -0.35,  &
+         -0.43,   -0.36,   -0.71/)
+
    g2(:,6) = (/                                               & ! 2020
-      -29404.8, -1450.9,  4652.5, -2499.6,  2982.0, -2991.6,  & 
-        1676.9,  -734.6,  1363.2, -2381.2,   -82.1,  1236.2,  &
-         241.9,   525.7,  -543.4,   903.0,   809.5,   281.9,  &
-          86.3,  -158.4,  -309.4,   199.7,    48.0,  -349.7,  &
-        -234.3,   363.2,    47.7,   187.8,   208.3,  -140.6,  &
-        -121.2,  -151.2,    32.3,    13.5,    98.8,    66.0,  &
-          65.5,   -19.1,    72.9,    25.1,  -121.5,    52.8,  &
-         -36.2,   -64.5,    13.5,     8.9,   -64.7,    68.1,  &
-          80.6,   -76.7,   -51.5,    -8.2,   -16.9,    56.5,  &
-           2.2,    15.8,    23.5,     6.4,    -2.2,    -7.2,  &
-         -27.2,     9.8,    -1.8,    23.7,     9.7,	8.4,  &
-         -17.5,   -15.3,    -0.5,    12.8,   -21.1,   -11.7,  &
-          15.3,    14.9,    13.7,     3.6,   -16.5,    -6.9,  &
-          -0.3,     2.8,     5.0,     8.4,   -23.4,	2.9,  &
-          11.0,    -1.5,     9.8,    -1.1,    -5.1,   -13.2,  &
-          -6.3,     1.1,     7.8,     8.8,     0.4,    -9.3,  &
-          -1.4,   -11.9,     9.6,    -1.9,    -6.2,	3.4,  &
-          -0.1,    -0.2,     1.7,     3.5,    -0.9,	4.8,  &
+      -29403.4, -1451.4,  4653.4, -2499.8,  2982.0, -2991.7,  &
+        1676.8,  -734.6,  1363.0, -2380.8,   -82.0,  1236.1,  &
+         241.8,   525.6,  -542.5,   902.8,   809.5,   282.1,  &
+          86.2,  -158.5,  -309.5,   199.8,    47.4,  -350.3,  &
+        -234.4,   363.3,    47.5,   187.9,   208.4,  -140.7,  &
+        -121.4,  -151.2,    32.1,    14.0,    99.1,    66.0,  &
+          65.6,   -19.2,    73.0,    25.0,  -121.6,    52.8,  &
+         -36.1,   -64.4,    13.6,     9.0,   -64.8,    68.0,  &
+          80.5,   -76.6,   -51.5,    -8.2,   -16.9,    56.5,  &
+           2.4,    15.8,    23.6,     6.3,    -2.2,    -7.2,  &
+         -27.2,     9.8,    -1.9,    23.7,     9.7,     8.4,  &
+         -17.5,   -15.2,    -0.5,    12.8,   -21.1,   -11.8,  &
+          15.3,    14.9,    13.7,     3.6,   -16.6,    -6.9,  &
+          -0.3,     2.9,     5.0,     8.4,   -23.4,     2.8,  &
+          11.0,    -1.5,     9.9,    -1.1,    -5.1,   -13.2,  &
+          -6.2,     1.1,     7.8,     8.8,     0.4,    -9.2,  &
+          -1.4,   -11.9,     9.6,    -1.8,    -6.2,     3.4,  &
+          -0.1,    -0.2,     1.7,     3.5,    -0.9,     4.9,  &
            0.7,    -8.6,    -0.9,    -0.1,     1.9,    -4.3,  &
            1.4,    -3.4,    -2.4,    -0.1,    -3.8,    -8.8,  &
-           3.0,    -1.4,     0.0,    -2.5,     2.5,	2.3,  &
-          -0.6,    -0.9,    -0.4,     0.3,     0.6,    -0.7,  &
+           3.0,    -1.4,    -0.0,    -2.5,     2.5,     2.3,  &
+          -0.6,    -0.8,    -0.4,     0.3,     0.6,    -0.7,  &
           -0.2,    -0.1,    -1.7,     1.4,    -1.6,    -0.6,  &
           -3.0,     0.2,    -2.0,     3.1,    -2.5,    -2.0,  &
-          -0.1,    -1.2,     0.4,     0.5,     1.3,	1.4,  &
-          -1.1,    -1.8,     0.7,     0.1,     0.3,	0.8,  &
-           0.5,    -0.2,    -0.3,     0.6,    -0.5,	0.2,  &
-           0.1,    -0.9,    -1.1,    -0.0,    -0.3,	0.5,  &
-           0.1,    -0.9,    -0.9,     0.5,     0.6,	0.7,  &
+          -0.1,    -1.1,     0.4,     0.5,     1.3,     1.4,  &
+          -1.1,    -1.8,     0.7,     0.1,     0.3,     0.7,  &
+           0.5,    -0.1,    -0.3,     0.6,    -0.5,     0.2,  &
+           0.1,    -0.9,    -1.1,    -0.0,    -0.3,     0.5,  &
+           0.1,    -0.9,    -0.9,     0.5,     0.6,     0.7,  &
            1.4,    -0.3,    -0.4,     0.8,    -1.3,    -0.0,  &
-          -0.1,     0.8,     0.3,    -0.0,    -0.1,	0.4,  &
+          -0.1,     0.8,     0.3,    -0.1,    -0.1,     0.4,  &
            0.5,     0.1,     0.5,     0.5,    -0.4,    -0.5,  &
-          -0.3,    -0.4,    -0.6/)	       
-!
-    g2(1:80,7) = (/                                           & ! 2022
-        5.7,     7.4,   -25.9,   -11.0,    -7.0,   -30.2,     &
-       -2.1,   -22.4,	  2.2,    -5.9,     6.0,     3.1,     &
-       -1.1,   -12.0,	  0.5,    -1.2,    -1.5,    -0.1,     &
-       -5.9,	 6.5,	  5.2,     3.5,    -5.1,    -5.0,     &
-       -0.3,	 0.5,	 -0.0,    -0.6,     2.5,     0.2,     &
-       -0.6,	 1.3,	  3.0,     0.9,     0.3,    -0.5,     &
-       -0.3,	 0.0,	  0.4,    -1.6,     1.3,    -1.3,     &
-       -1.4,	 0.8,	 -0.0,     0.0,     0.9,     1.0,     &
-       -0.1,	-0.2,	  0.6,    -0.0,     0.6,     0.7,     &
-       -0.8,	 0.1,	 -0.2,    -0.5,    -1.1,    -0.8,     &
-     	0.1,	 0.8,	  0.3,    -0.0,     0.1,    -0.2,     &
-       -0.1,	 0.6,	  0.4,    -0.2,    -0.1,     0.5,     &
-     	0.4,	-0.3,	  0.3,    -0.4,    -0.1,     0.5,     &
-     	0.4,	 0.0/)
-    g2(81:n2,7) = 0.0
+          -0.4,    -0.4,    -0.6/)
+
+   g2(:,7) = (/                                               & ! 2025
+      -29350.0, -1410.3,  4545.5, -2556.2,  2950.9, -3133.6,  &
+        1648.7,  -814.2,  1360.9, -2404.2,   -56.9,  1243.8,  &
+         237.6,   453.4,  -549.6,   894.7,   799.6,   278.6,  &
+          55.8,  -134.0,  -281.1,   212.0,    12.0,  -375.4,  &
+        -232.9,   369.0,    45.3,   187.2,   220.0,  -138.7,  &
+        -122.9,  -141.9,    42.9,    20.9,   106.2,    64.3,  &
+          63.8,   -18.4,    76.7,    16.8,  -115.7,    48.9,  &
+         -40.9,   -59.8,    14.9,    10.9,   -60.8,    72.8,  &
+          79.6,   -76.9,   -48.9,    -8.8,   -14.4,    59.3,  &
+          -1.0,    15.8,    23.5,     2.5,    -7.4,   -11.2,  &
+         -25.1,    14.3,    -2.2,    23.1,    10.9,     7.2,  &
+         -17.5,   -12.6,     2.0,    11.5,   -21.8,    -9.7,  &
+          16.9,    12.7,    14.9,     0.7,   -16.8,    -5.2,  &
+           1.0,     3.9,     4.7,     8.0,   -24.8,     3.0,  &
+          12.1,    -0.2,     8.3,    -2.5,    -3.4,   -13.1,  &
+          -5.3,     2.4,     7.2,     8.6,    -0.6,    -8.7,  &
+           0.8,   -12.8,     9.8,    -1.3,    -6.4,     3.3,  &
+           0.2,     0.1,     2.0,     2.5,    -1.0,     5.4,  &
+          -0.5,    -9.0,    -0.9,     0.4,     1.5,    -4.2,  &
+           0.9,    -3.8,    -2.6,     0.9,    -3.9,    -9.0,  &
+           3.0,    -1.4,     0.0,    -2.5,     2.8,     2.4,  &
+          -0.6,    -0.6,     0.1,     0.0,     0.5,    -0.6,  &
+          -0.3,    -0.1,    -1.2,     1.1,    -1.7,    -1.0,  &
+          -2.9,    -0.1,    -1.8,     2.6,    -2.3,    -2.0,  &
+          -0.1,    -1.2,     0.4,     0.6,     1.2,     1.0,  &
+          -1.2,    -1.5,     0.6,     0.0,     0.5,     0.6,  &
+           0.5,    -0.2,    -0.1,     0.8,    -0.5,     0.1,  &
+          -0.2,    -0.9,    -1.2,     0.1,    -0.7,     0.2,  &
+           0.2,    -0.9,    -0.9,     0.6,     0.7,     0.7,  &
+           1.2,    -0.2,    -0.3,     0.5,    -1.3,     0.1,  &
+          -0.1,     0.7,     0.2,     0.0,    -0.2,     0.3,  &
+           0.5,     0.2,     0.6,     0.4,    -0.6,    -0.5,  &
+          -0.3,    -0.4,    -0.5/)
+
+    g2(1:80,8) = (/                                           & ! 2026
+          12.6,    10.0,   -21.5,   -11.2,    -5.3,   -27.3,  &
+          -8.3,   -11.1,    -1.5,    -4.4,     3.8,     0.4,  &
+          -0.2,   -15.6,    -3.9,    -1.7,    -2.3,    -1.3,  &
+          -5.8,     4.1,     5.4,     1.6,    -6.8,    -4.1,  &
+           0.6,     1.3,    -0.5,     0.0,     2.1,     0.7,  &
+           0.5,     2.3,     1.7,     1.0,     1.9,    -0.2,  &
+          -0.3,     0.3,     0.8,    -1.6,     1.2,    -0.4,  &
+          -0.8,     0.8,     0.4,     0.7,     0.9,     0.9,  &
+          -0.1,    -0.1,     0.6,    -0.1,     0.5,     0.5,  &
+          -0.7,    -0.1,     0.0,    -0.8,    -0.9,    -0.8,  &
+           0.5,     0.9,    -0.3,    -0.1,     0.2,    -0.3,  &
+           0.0,     0.4,     0.4,    -0.3,    -0.1,     0.4,  &
+           0.3,    -0.5,     0.1,    -0.6,     0.0,     0.3,  &
+           0.3,     0.2/)
+    g2(81:n2,8) = 0.0
 !
 ! Set gh from g1,g2:
 !
@@ -2493,9 +2528,9 @@ subroutine cofrm(date)
     gh(i+1:i+n2) = g2(:,n)
 !   write(6,"('cofrm: n=',i3,' i+1:i+n2=',i4,':',i4)") n,i+1,i+n2
   enddo
-  gh(ngh) = 0. ! not sure why gh is dimensioned with the extra element, so set it to 0. 
-  
-  if (date < 2020.) then
+  gh(ngh) = 0. ! not sure why gh is dimensioned with the extra element, so set it to 0.
+
+  if (date < 2025.) then
     t   = 0.2*(date - 1900.)
     ll  = t
     one = ll
@@ -2517,18 +2552,18 @@ subroutine cofrm(date)
       tc = -0.2
       t = 0.2
     endif
-  else ! date >= 2020
-    t     = date - 2020.0
+  else ! date >= 2025
+    t     = date - 2025.0
     tc    = 1.0
     if (isv.eq.1) then
       t = 1.0
       tc = 0.0
     end if
-    ll    = 3255
+    ll    = 3450
     nmx   = 13
     nc    = nmx*(nmx+2)
     kmx   = (nmx+1)*(nmx+2)/2
-  endif ! date < 2020
+  endif ! date < 2025
   r = alt
   l = 1
   m = 1
@@ -2536,7 +2571,7 @@ subroutine cofrm(date)
 !
 ! Set outputs gb(ncoef) and gv(ncoef)
 ! These are module data above.
-! 
+!
   gb(1) = 0.
   gv(1) = 0.
   f0 = -1.e-5
@@ -2549,14 +2584,14 @@ subroutine cofrm(date)
     if (m == 0) f0 = f0 * float(n)/2.
     if (m == 0) f  = f0 / sqrt(2.0)
     nn = n+1
-    mm = 1      
-      
+    mm = 1
+
     if (m /= 0) then
       f = f / sqrt(float(n-m+1) / float(n+m) )
       gb(l+1)  = (tc*gh(lm) + t*gh(lm+nc))* f
-    else   
+    else
       gb(l+1)  = (tc*gh(lm) + t*gh(lm+nc))* f0
-    endif  
+    endif
     gv(l+1) = gb(l+1)/float(nn)
     if (m /= 0) then
       gb(l+2)  = (tc*gh(lm+1) + t*gh(lm+nc+1))*f
@@ -2573,7 +2608,7 @@ subroutine cofrm(date)
 !
 ! Compute geocentric colatitude (colat) and longitude (elon) of the
 !  north pole of earth centered dipole, and cosine (ctp) and sine (stp)
-!  of colat, for use in other routines.  
+!  of colat, for use in other routines.
 !
   gpl = sqrt( gb(2  )**2+ gb(3  )**2+ gb(4  )**2)
   ctp = gb(2  )/gpl
@@ -2581,7 +2616,7 @@ subroutine cofrm(date)
 
   colat = (acos(ctp))*rtd
   elon = atan2( gb(4  ), gb(3  ))*rtd
-!           
+!
 ! Compute magnitude of magnetic potential at pole, radius Re.
 !      .2 = 2*(10**-4 T/gauss)*(1000 m/km) (2 comes through f0).
 !
@@ -2593,7 +2628,7 @@ subroutine subsol(iyr,iday,ihr,imn,sec,sbsllat,sbsllon)
 !
 ! Find subsolar geographic latitude and longitude given the
 ! date and time (Universal Time).
-!     
+!
 ! This is based on formulas in Astronomical Almanac for the
 ! year 1996, p.  C24. (U.S.  Government Printing Office,
 ! 1994).  According to the Almanac, results are good to at
@@ -2604,7 +2639,7 @@ subroutine subsol(iyr,iday,ihr,imn,sec,sbsllat,sbsllon)
 ! to have exactly 86400 seconds; thus leap seconds that
 ! sometimes occur on June 30 and December 31 are ignored:
 ! their effect is below the accuracy threshold of the algorithm.
-!     
+!
 ! 961026 A. D. Richmond, NCAR
 !
 ! Input Args:
@@ -2622,7 +2657,7 @@ subroutine subsol(iyr,iday,ihr,imn,sec,sbsllat,sbsllon)
 !
 ! Local:
   integer,parameter :: minyear=1601, maxyear = 2100
-  
+
   real :: yr,l0,g0,ut,df,lf,gf,l,g,grad,n,epsilon,epsrad,alpha,delta,&
     etdeg,aptime,lambda,lamrad,sinlam
   integer :: nleap,ncent,nrot
@@ -2659,63 +2694,63 @@ subroutine subsol(iyr,iday,ihr,imn,sec,sbsllat,sbsllon)
 !  where ARBITRARY INTEGER = YR+1.  This gives:
 !
       l0 = -79.549 + (-.238699*(yr-4*nleap) + 3.08514e-2*nleap)
-!                 
+!
 ! G0 = Mean anomaly at 12 UT on January 1 of IYR:
 !     G0 = 357.528 + .9856003*(365*(YR-NLEAP) + 366*NLEAP)
 !          - (ARBITRARY INTEGER)*360.
-!        = 357.528 + .9856003*(365*(YR-4*NLEAP) + (366+365*3)*NLEAP) 
+!        = 357.528 + .9856003*(365*(YR-4*NLEAP) + (366+365*3)*NLEAP)
 !          - (ARBITRARY INTEGER)*360.
 !        = (357.528 - 360.) + (.9856003*365 - 360.)*(YR-4*NLEAP)
 !          + (.9856003*(366+365*3) - 4*360.)*NLEAP,
 !  where ARBITRARY INTEGER = YR+1.  This gives:
 !
       g0 = -2.472 + (-.2558905*(yr-4*nleap) - 3.79617e-2*nleap)
-!     
+!
 ! Universal time in seconds:
       ut = float(ihr*3600 + imn*60) + sec
 !
 ! Days (including fraction) since 12 UT on January 1 of IYR:
       df = (ut/86400. - 1.5) + iday
 !
-! Addition to Mean longitude of Sun since January 1 of IYR: 
+! Addition to Mean longitude of Sun since January 1 of IYR:
       lf = .9856474*df
-! 
+!
 ! Addition to Mean anomaly since January 1 of IYR:
       gf = .9856003*df
-! 
+!
 ! Mean longitude of Sun:
       l = l0 + lf
-! 
+!
 ! Mean anomaly:
       g = g0 + gf
       grad = g*dtr
-! 
+!
 ! Ecliptic longitude:
       lambda = l + 1.915*sin(grad) + .020*sin(2.*grad)
       lamrad = lambda*dtr
       sinlam = sin(lamrad)
-! 
+!
 ! Days (including fraction) since 12 UT on January 1 of 2000:
       n = df + 365.*yr + float(nleap)
-! 
-! Obliquity of ecliptic: 
+!
+! Obliquity of ecliptic:
       epsilon = 23.439 - 4.e-7*n
       epsrad = epsilon*dtr
-! 
+!
 ! Right ascension:
       alpha = atan2(cos(epsrad)*sinlam,cos(lamrad))*rtd
-! 
+!
 ! Declination:
       delta = asin(sin(epsrad)*sinlam)*rtd
-! 
+!
 ! Subsolar latitude (output argument):
       sbsllat = delta
-! 
+!
 ! Equation of time (degrees):
       etdeg = l - alpha
       nrot = nint(etdeg/360.)
       etdeg = etdeg - float(360*nrot)
-! 
+!
 ! Apparent time (degrees):
 ! Earth rotates one degree every 240 s.
       aptime = ut/240. + etdeg
@@ -2734,8 +2769,8 @@ subroutine solgmlon(gclat,gclon,colat,elon,mlon)
 ! 940719 A. D. Richmond, NCAR
 !
 ! Algorithm:
-!   Use spherical coordinates. 
-!   Let GP be geographic pole. 
+!   Use spherical coordinates.
+!   Let GP be geographic pole.
 !   Let GM be geomagnetic pole (colatitude colat, east longitude elon).
 !   Let gclon be longitude of point P.
 !   Let TE be geocentric colatitude of point P ( = pi/2 - gclat*dtr).
@@ -2743,7 +2778,7 @@ subroutine solgmlon(gclat,gclon,colat,elon,mlon)
 !   Let TP be colatitude of GM.
 !   Let TF be arc length between GM and P.
 !   Let PA = be geomagnetic longitude in radians, i.e., Pi minus angle measured
-!     counterclockwise from arc GM-P to arc GM-GP. 
+!     counterclockwise from arc GM-P to arc GM-GP.
 !   Then, using notation c=cos, s=sin, spherical-trigonometry formulas
 !     for the functions of the angles are as shown below.  Note: stfcpa,
 !     stfspa are sin(TF) times cos(PA), sin(PA), respectively.
@@ -2754,9 +2789,9 @@ subroutine solgmlon(gclat,gclon,colat,elon,mlon)
                gclon, & ! geocentric longitude, deg.
                colat, & ! geocentric colatitude of dipole north pole, deg.
                elon     ! geocentric east longitude of dipole north pole, deg.
-! 
+!
 ! Output Arg: Geomagnetic dipole longitude of the point (deg, -180. to 180.)
-  real,intent(out) :: mlon 
+  real,intent(out) :: mlon
 !
 ! Local:
   real :: ctp,stp,ang,cang,sang,cte,ste,stfcpa,stfspa
@@ -2776,7 +2811,7 @@ end subroutine solgmlon
 !-----------------------------------------------------------------------
 subroutine mlt2alon(xmlt,sbsllat,sbsllon,clatp,polon,alonx)
 !
-! To go from mlt to alon 
+! To go from mlt to alon
 !   Inputs:
 !    xmlt    = magnetic local time for the apex longitude alonx (hours,
 !		 0. to 24.)
@@ -2790,15 +2825,15 @@ subroutine mlt2alon(xmlt,sbsllat,sbsllon,clatp,polon,alonx)
 !
   real, intent(in) :: xmlt,sbsllat,sbsllon,clatp,polon
   real, intent(out):: alonx
-! Local  
+! Local
   real :: smlon
-!  
+!
 ! 2018 May 17 ADR: Technically, geocentric instead of geographic (geodetic)
 !   latitude should be used in call to solgmlon, but the error caused is
 !   likely to be small.  Correcting for this error would involve
 !   modifying the algorithm to be height-dependent, since the difference
-!   between geocentric and geographic latitudes is height-dependent. 
-!  
+!   between geocentric and geographic latitudes is height-dependent.
+!
   call solgmlon(sbsllat,sbsllon,clatp,polon,smlon)
   alonx = 15.*(xmlt-12)+smlon
   if(alonx.gt.180) alonx = alonx-360.
@@ -2827,14 +2862,14 @@ subroutine magloctm(alon,sbsllat,sbsllon,clatp,polon,mlt)
  real, intent(out):: mlt
 ! Local
   real :: smlon
-  
+
 !
 ! 2018 May 17 ADR: Technically, geocentric instead of geographic (geodetic)
 !   latitude should be used in call to solgmlon, but the error caused is
 !   likely to be small.  Correcting for this error would involve
 !   modifying the algorithm to be height-dependent, since the difference
-!   between geocentric and geographic latitudes is height-dependent. 
-!  
+!   between geocentric and geographic latitudes is height-dependent.
+!
   call solgmlon(sbsllat,sbsllon,clatp,polon,smlon)
   mlt = (alon-smlon)/15.+12.
   if(mlt.ge.24.) mlt = mlt-24
@@ -2868,15 +2903,15 @@ subroutine cossza(glat,glon,sbsllat,sbsllon,csza)
  ss = sqrt(1-cs*cs)
  ang = (glon-sbsllon)*dtr
  csza = ct*cs + st*ss*cos(ang)
-! 
+!
 end subroutine cossza
 !-----------------------------------------------------------------------
 subroutine apex_m2g(xlatm,alon,alt,hr,gdlat,gdlon)
 !  Given Modified Apex coordinates determine geographic
-!   coordinates (gdlat, gdlon). 
+!   coordinates (gdlat, gdlon).
 
   real, intent(in) ::  &
-             xlatm,  & ! modified magnetic apex latitude 
+             xlatm,  & ! modified magnetic apex latitude
              alon,   & ! modified magnetic apex longitude
              alt,    & ! altitude
              hr        ! reference height for modified magnetic apex coordinates
@@ -2886,19 +2921,19 @@ subroutine apex_m2g(xlatm,alon,alt,hr,gdlat,gdlon)
 ! Local
   integer :: ier
   real :: qdlat, qdlon ! Quasi-Dipole latitude, longitude
-!   
+!
 ! equation 6.2 (Richmond, 1995)
-  qdlat = acos(sqrt((re+alt)/(re+hr))*cos(xlatm*dtr))*rtd 
+  qdlat = acos(sqrt((re+alt)/(re+hr))*cos(xlatm*dtr))*rtd
   qdlat= sign(qdlat,xlatm)
   qdlon = alon
-!   
+!
 ! convert from quasi-dipole to geodetic coordinates
   call apex_q2g(qdlat,qdlon,alt,gdlat,gdlon,ier)
   if (ier /= 0) then
     write(6,"('>>> apex_q2g error ')")
     stop 'apex_m2g apex_q2g'
   endif
-!   
+!
 end subroutine apex_m2g
 !-----------------------------------------------------------------------
 subroutine gc2gm(gclat,gclon,gmlat,gmlon)

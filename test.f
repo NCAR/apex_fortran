@@ -9,11 +9,11 @@ c Test program for apex.f90 module
       real B(3),bhat(3),d1(3),d2(3),d3(3),e1(3),e2(3),e3(3),f1(3),f2(3)
      + ,f3(3),g1(3),g2(3),g3(3)
       real vx,vy,vz,ve1,ve2,ve3,Ed1,Ed2
-      real sec,sbsllat,sbsllon,csza,sza,mlt 
+      real sec,sbsllat,sbsllon,csza,sza,mlt
 c
-c Set up 3D interpolation arrays for date=2015.1, between the ground
+c Set up 3D interpolation arrays for date=2025.5, between the ground
 c  and at least altmax=1000 km altitude.
-      date = 2015.1
+      date = 2025.5
       altmax = 1000.
       write (6,'(''date='',f7.2,''        altmax='',f10.1)') date,altmax
       call apex_setup(date,altmax)
@@ -58,7 +58,7 @@ c  along the entire geomagnetic-field line.
       write (6,'(a43,3f7.2)') 'Case 1. Purely eastward velocity, vx,vy,v
      1z=',vx,vy,vz
       write (6,'(a12,3f8.2,a12,2f9.5)') 've1,ve2,ve3=',ve1,ve2,ve3,
-     1'    Ed1,Ed2=',Ed1,Ed2 
+     1'    Ed1,Ed2=',Ed1,Ed2
       vx = 0.
       vy = 100.
       vz = 0.
@@ -66,11 +66,11 @@ c  along the entire geomagnetic-field line.
       ve2 = d2(1)*vx + d2(2)*vy + d2(3)*vz
       ve3 = d3(1)*vx + d3(2)*vy + d3(3)*vz
       Ed1 = -ve2/Be3
-      Ed2 =  ve1/Be3 
+      Ed2 =  ve1/Be3
       write (6,'(a44,3f7.2)') 'Case 2. Purely northward velocity, vx,vy,
      1vz=',vx,vy,vz
       write (6,'(a12,3f8.2,a12,2f9.5)') 've1,ve2,ve3=',ve1,ve2,ve3,
-     1'    Ed1,Ed2=',Ed1,Ed2 
+     1'    Ed1,Ed2=',Ed1,Ed2
       vx = 0.
       vy = 0.
       vz = 100.
@@ -82,13 +82,13 @@ c  along the entire geomagnetic-field line.
       write (6,'(a41,3f7.2)') 'Case 3. Purely upward velocity, vx,vy,vz=
      1',vx,vy,vz
       write (6,'(a12,3f8.2,a12,2f9.5)') 've1,ve2,ve3=',ve1,ve2,ve3,
-     1'    Ed1,Ed2=',Ed1,Ed2 
+     1'    Ed1,Ed2=',Ed1,Ed2
 c
 c Example 3: Calculate the geographic latitude and longitude of the
-c  footpoints of this field line at 110 km in both hemispheres. 
+c  footpoints of this field line at 110 km in both hemispheres.
       write (6,'(1x,/,''Example 3:  Calculate the geographic latitude an
-     +d longitude of the footpoints'',/,''    of this field line at 110 
-     +km in both hemispheres.'')') 
+     +d longitude of the footpoints'',/,''    of this field line at 110
+     +km in both hemispheres.'')')
       alt = 110.
       call apex_m2g(malat,alon,alt,hr,gdlat,gdlon)
       write (6,'(a13,f10.4)') '110 km glat =',gdlat
@@ -157,22 +157,21 @@ c Find solar zenith angle at glat,glon for this time:
 c Find magnetic local time
       call apex_mall(glat,glon,alt,hr, B,bhat,bmag,si,qdlon,malat,vmp,
      1  W,D,Be3,sim,d1,d2,d3,e1,e2,e3,qdlat,F,f1,f2,f3,g1,g2,g3,ier)
-      write (6,'(''apex_mall gives magnetic longitude ='',f8.2)') qdlon 
+      write (6,'(''apex_mall gives magnetic longitude ='',f8.2)') qdlon
       call magloctm(qdlon,sbsllat,sbsllon,colat,elon,mlt)
       write (6,'(''magloctm returns: mlt ='',f7.3,'' hours'')') mlt
 
-c Find magnetic (modified apex and quasi-dipole) longitude 
+c Find magnetic (modified apex and quasi-dipole) longitude
       call mlt2alon(mlt,sbsllat,sbsllon,colat,elon,alon)
       write (6,'(''mlt2alon returns magnetic longitude ='',f7.2,'' deg''
      +)') alon
 
 c Find dipole gmlat,gmlon corresponding to geographic glat,glon:
-      call gc2gm(glat,glon,gmlat,gmlon) 
+      call gc2gm(glat,glon,gmlat,gmlon)
       write (6,'(''gc2gm returns: gmlat,gmlon ='',2F8.2,'' deg'')')
-     +                            gmlat,gmlon 
-      call gm2gc(gmlat,gmlon,gclat,gclon) 
+     +                            gmlat,gmlon
+      call gm2gc(gmlat,gmlon,gclat,gclon)
       write (6,'(''gm2gc returns: gclat,gclon ='',2F8.2,'' deg'')')
-     +                            gclat,gclon 
+     +                            gclat,gclon
 
       end
-
