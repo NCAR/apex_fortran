@@ -6,9 +6,9 @@ hr    =    80.0000
 glat  =    40.0000
 glon  =  -105.0000
 alt   =   800.0000
-m(110)lat =   50.8559
+m(110)lat =   50.8560
 qdlat =    48.2741
-m(110)lon and qdlon =  -37.6765
+m(110)lon and qdlon =  -37.6766
 
 Example 2:  Calculate scaled velocities and electric-field components
     for three cases at this location.
@@ -24,7 +24,7 @@ Example 3:  Calculate the geographic latitude and longitude of the footpoints
 110 km glat =   42.3848
 110 km glon = -104.5717
 opp. hem. 110 km glat =  -57.1787
-opp. hem. 110 km glon = -129.9222
+opp. hem. 110 km glon = -129.9223
 
 Example 4:  Use apex_q2g to get geographic coordinates from given quasi-dipole
      coordinates, then reverse the calculation by calling apex_mall
@@ -37,13 +37,13 @@ Example 5: Use related routines subsol, magloctm and mlt2alon to obtain the
      then convert magnetic local time back to apex longitude
 Call cofrm for date =    2018.5
 Dipole pole colatitude, east longitude, and magnetic potential are:
-colat,elon,vp=   9.4936 -72.6593 190.0164 deg, deg, T-m
+colat,elon,vp=   9.4951 -72.6577 190.0110 deg, deg, T-m
 subsol inputs: iyr,iday,ihr,imn,sec= 2018  182   12    0   0. UT
 subsol returns: sbsllat,sbsllon =   23.09    0.97 deg
 Then at glat,glon=   40.00 -105.00
 cossza gives solar zenith angle =   86.66 degrees
-apex_mall gives magnetic longitude =  -37.73
+apex_mall gives magnetic longitude =  -37.74
 magloctm returns: mlt =  4.299 hours
-mlt2alon returns magnetic longitude = -37.73 deg
-gc2gm returns: gmlat,gmlon =   47.79  -37.59 deg
+mlt2alon returns magnetic longitude = -37.74 deg
+gc2gm returns: gmlat,gmlon =   47.80  -37.59 deg
 gm2gc returns: gclat,gclon =   40.00 -105.00 deg
