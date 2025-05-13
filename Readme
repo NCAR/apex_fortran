@@ -12,3 +12,13 @@
 12/2024
   update the code with IGRF 14 coefficients (released 19th Nov 2024)
   https://www.ncei.noaa.gov/products/international-geomagnetic-reference-field
+
+05/2025
+  Update to add the ability to read the IGRF coffecients from the file provided by NGDC at 
+  https://www.ngdc.noaa.gov/IAGA/vmod/coeffs/igrf14coeffs.txt.  This will be come the default 
+  behavior with the next update of IGRF.  
+
+  Also changes the license to BSD-3 clause.  
+  
+  The igrf14coeffs.txt file is included in the repository for ease of use, but that file is provided 
+  by the US Government and is in the public domain and not covered by this license or copyright.
